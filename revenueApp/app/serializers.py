@@ -22,6 +22,9 @@ class RoundingDecimalField(serializers.DecimalField):
         return value
 
 class TotalSalesSerializer(serializers.Serializer):
+    """
+        Serializer for formatting the Sales model response
+    """
     event_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     total_sales = RoundingDecimalField(max_digits=10, decimal_places=2)
     
