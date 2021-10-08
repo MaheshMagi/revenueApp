@@ -17,17 +17,23 @@ from django.contrib import admin
 from django.urls import path, re_path
 from rest_framework import routers
 from app import views
+from django.conf.urls import url
+from app.swagger import get_swagger_view
+
+schema_view = get_swagger_view(title='Revenue App API')
+
 
 # router = routers.DefaultRouter()
 # router.register(r'revenue', views.RevenueViewSet, basename='revenue')
 
 urlpatterns = [
+    path(r'', schema_view),
     path('company', views.CompanyList.as_view()),
     path('company/<int:pk>', views.CompanyDetail.as_view()),
     path('revenue', views.RevenueList.as_view()),
     path('revenue/<int:pk>', views.RevenueDetail.as_view()),
-    re_path(r'sales/(?P<string>hourly|daily)', views.TotalSales.as_view()),
+    path('sales/hourly', views.TotalSales.as_view()),
+    path('sales/daily', views.TotalSales.as_view()),
     path('admin/', admin.site.urls),
     path('ping/', views.ping),
-
 ]

@@ -21,6 +21,17 @@ class TotalSales(generics.GenericAPIView):
     """
 
     def get(self, request, **kwargs):
+        """
+        Retrieve Total sales on duration
+
+        Parameters:
+        branch_id - Branch id for the company
+        start     - Start date of the duration (eg: 2020-06-30)
+        end       - End data of the duration (eg: 2020-07-01)
+
+        Returns: 
+        A List of dictionary which contains both time duration and sales accordingly
+        """
         try:
             path = request.get_full_path().lower()
             serializer = SalesRequestSerializer(data=request.GET)
