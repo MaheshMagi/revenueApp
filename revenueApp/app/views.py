@@ -1,3 +1,4 @@
+import traceback
 from django.http import HttpResponse
 from django.http.response import JsonResponse
 from django.db.models import Sum
@@ -21,9 +22,10 @@ class TotalSales(generics.GenericAPIView):
 
     def get(self, request, **kwargs):
         try:
+            path = request.get_full_path().lower()
             serializer = SalesRequestSerializer(data=request.GET)
+            response_dict = dict()
             if serializer.is_valid():
-                path = request.get_full_path().lower()
                 # adding neccessary filter for query operation
                 filter_dict = dict(
                     company__branch_id=serializer.validated_data.get('branch_id'),
@@ -41,9 +43,16 @@ class TotalSales(generics.GenericAPIView):
                         total_sales=Sum('total')
                     ).values('event_time', 'total_sales')
                 serializer = TotalSalesSerializer(queryset, many=True)
-                return JsonResponse(serializer.data, safe=False ,status=status.HTTP_200_OK)
+                
+                # response construction
+                response_dict.update(message="Total sales found", data=serializer.data)
+                if not serializer.data:
+                    response_dict.update(message="There were no sales during that period",
+                    data=serializer.data)
+                return JsonResponse(response_dict, safe=False ,status=status.HTTP_200_OK)
             return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
+            print(traceback.format_exc())
             return JsonResponse({"message": "Something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
