@@ -2,10 +2,10 @@ import traceback
 from django.http import HttpResponse
 from django.http.response import JsonResponse
 from django.db.models import Sum
-from django.db.models.functions import TruncHour, TruncDay
 from rest_framework import generics, status
 from app.models import Company, RevenueDetails
 from app.serializers import CompanySerializer, RevenueSerializer, TotalSalesSerializer, SalesRequestSerializer
+from app.helpers import get_annotate_by_duration
 
 
 def ping(request):
@@ -37,6 +37,7 @@ class TotalSales(generics.GenericAPIView):
             serializer = SalesRequestSerializer(data=request.GET)
             response_dict = dict()
             if serializer.is_valid():
+
                 # adding neccessary filter for query operation
                 filter_dict = dict(
                     company__branch_id=serializer.validated_data.get('branch_id'),
@@ -46,7 +47,7 @@ class TotalSales(generics.GenericAPIView):
                 )
                 
                 queryset = RevenueDetails.objects.filter(**filter_dict)
-                event_time = TruncDay('updated_date') if path.startswith('/sales/daily') else TruncHour('updated_date')
+                event_time = get_annotate_by_duration(path)
 
                 queryset = queryset.annotate(
                         event_time=event_time
