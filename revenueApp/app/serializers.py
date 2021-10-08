@@ -13,10 +13,18 @@ class RevenueSerializer(serializers.ModelSerializer):
         model = RevenueDetails
         fields = ['id','company', 'receipt', 'updated_date', 'total']
 
-class TotalSalesSerializer(serializers.Serializer):
-    event_time = serializers.DateTimeField()
-    total_sales = serializers.FloatField()
+class RoundingDecimalField(serializers.DecimalField):
+    """
+    Used to automaticaly round decimals to the model's accepted value.
+    """
 
+    def validate_precision(self, value):
+        return value
+
+class TotalSalesSerializer(serializers.Serializer):
+    event_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    total_sales = RoundingDecimalField(max_digits=10, decimal_places=2)
+    
 class SalesRequestSerializer(serializers.Serializer):
     start = serializers.DateField(format="%Y-%m-%d", required=False)
     end = serializers.DateField(format="%Y-%m-%d", required=False)
